@@ -14,6 +14,7 @@
   "dependencies": {
     "@hapi/hapi": "^20.2.2",
     "auto-bind": "^4.0.0",
+    "bcrypt": "^5.0.1",
     "dotenv": "^16.0.2",
     "joi": "^17.6.0",
     "nanoid": "^3.3.4",

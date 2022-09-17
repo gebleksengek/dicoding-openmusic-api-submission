@@ -68,7 +68,7 @@ class SongsHandler {
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
-  async getSongs(request, h) {
+  async getSongsHandler(request, h) {
     try {
       const { title, performer } = /** @type {ISongsGetQuery} */ (
         request.query
@@ -91,7 +91,7 @@ class SongsHandler {
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
-  async getSongById(request, h) {
+  async getSongByIdHandler(request, h) {
     try {
       const { id } = /** @type {{id: string}} */ (request.params);
 
@@ -112,7 +112,7 @@ class SongsHandler {
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
-  async putSongById(request, h) {
+  async putSongByIdHandler(request, h) {
     try {
       this._validator.validateSongPayload(request.payload);
       const { id } = /** @type {{id:string}} */ (request.params);
@@ -135,7 +135,7 @@ class SongsHandler {
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
-  async deleteAlbumById(request, h) {
+  async deleteAlbumByIdHandler(request, h) {
     try {
       const { id } = /** @type {{id: string}} */ (request.params);
 

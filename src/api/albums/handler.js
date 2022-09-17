@@ -25,7 +25,6 @@ class AlbumsHandler {
   _validator;
 
   /**
-   *
    * @param {IAlbumsService} service
    * @param {import('../../validator/albums')} validator
    */
@@ -37,7 +36,6 @@ class AlbumsHandler {
   }
 
   /**
-   *
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
@@ -46,6 +44,7 @@ class AlbumsHandler {
       this._validator.validateAlbumPayload(request.payload);
 
       const { name, year } = /** @type {IAlbumEntity} */ (request.payload);
+
       const albumId = await this._service.addAlbum({ name, year });
 
       const response = h.response({
@@ -67,7 +66,7 @@ class AlbumsHandler {
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
-  async getAlbumById(request, h) {
+  async getAlbumByIdHandler(request, h) {
     try {
       const { id } = /** @type {{id: string}} */ (request.params);
 
@@ -88,9 +87,10 @@ class AlbumsHandler {
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
-  async putAlbumByid(request, h) {
+  async putAlbumByIdHandler(request, h) {
     try {
       this._validator.validateAlbumPayload(request.payload);
+
       const { id } = /** @type {{id: string}} */ (request.params);
       const { name, year } = /** @type {IAlbumEntity} */ (request.payload);
 
@@ -109,7 +109,7 @@ class AlbumsHandler {
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
-  async deleteAlbumById(request, h) {
+  async deleteAlbumByIdHandler(request, h) {
     try {
       const { id } = /** @type {{id: string}} */ (request.params);
 

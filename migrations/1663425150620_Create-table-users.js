@@ -4,7 +4,7 @@
  * @typedef {import('node-pg-migrate').MigrationBuilder} MigrationBuilder
  */
 
-const table_name = 'songs';
+const table_name = 'users';
 
 /**
  * @param {MigrationBuilder} pgm
@@ -15,30 +15,18 @@ exports.up = (pgm) => {
       type: 'varchar(21)',
       primaryKey: true,
     },
-    title: {
+    username: {
       type: 'varchar(50)',
+      unique: true,
       notNull: true,
     },
-    year: {
-      type: 'smallint',
+    password: {
+      type: 'text',
       notNull: true,
     },
-    performer: {
-      type: 'varchar(50)',
+    fullname: {
+      type: 'text',
       notNull: true,
-    },
-    genre: {
-      type: 'varchar(32)',
-      notNull: true,
-    },
-    duration: {
-      type: 'smallint',
-    },
-    albumId: {
-      type: 'varchar(22)',
-      references: '"albums"',
-      onUpdate: 'cascade',
-      onDelete: 'cascade',
     },
     createdAt: {
       type: 'timestamp',

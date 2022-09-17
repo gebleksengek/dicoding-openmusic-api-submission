@@ -48,7 +48,11 @@ class SongsService {
     const updatedAt = createdAt;
 
     const query = {
-      text: `INSERT INTO ${this._tableName} VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+      text: `
+        INSERT INTO ${this._tableName} 
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+        RETURNING id
+      `,
       values: [
         id,
         title,
@@ -76,11 +80,16 @@ class SongsService {
    * @returns {Promise<any>}
    */
   async getSongs({ title = '', performer = '' }) {
-    const result = await this._pool.query(`
-      SELECT id,title,performer FROM ${this._tableName}
-      WHERE LOWER(title) LIKE '%${title}%'
-      AND LOWER(performer) LIKE '%${performer}%'
-    `);
+    const query = {
+      text: `
+        SELECT id,title,performer FROM ${this._tableName}
+        WHERE LOWER(title) LIKE $1
+        AND LOWER(performer) LIKE $2
+      `,
+      values: [`%${title}%`, `%${performer}%`],
+    };
+
+    const result = await this._pool.query(query);
 
     return result.rows;
   }
@@ -90,7 +99,10 @@ class SongsService {
    */
   async getSongById(id) {
     const query = {
-      text: `SELECT id,title,year,performer,genre,duration,"albumId" FROM ${this._tableName} WHERE id = $1`,
+      text: `
+        SELECT id,title,year,performer,genre,duration,"albumId"
+        FROM ${this._tableName} WHERE id = $1
+      `,
       values: [id],
     };
 
@@ -110,7 +122,12 @@ class SongsService {
   async editSongById(id, { title, year, performer, genre, duration, albumId }) {
     const updatedAt = new Date().toISOString();
     const query = {
-      text: `UPDATE ${this._tableName} SET title = $1, year = $2, performer = $3, genre = $4, duration = $5, "albumId" = $6, "updatedAt" = $7 WHERE id = $8 RETURNING id`,
+      text: `
+        UPDATE ${this._tableName} 
+        SET title = $1, year = $2, performer = $3, genre = $4, 
+        duration = $5, "albumId" = $6, "updatedAt" = $7 
+        WHERE id = $8 RETURNING id
+      `,
       values: [title, year, performer, genre, duration, albumId, updatedAt, id],
     };
 

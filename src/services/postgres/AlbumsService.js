@@ -101,7 +101,11 @@ class AlbumsService {
   async editAlbumById(id, { name, year }) {
     const updatedAt = new Date().toISOString();
     const query = {
-      text: `UPDATE ${this._tableName} SET name = $1, year = $2, "updatedAt" = $3 WHERE id = $4 RETURNING id`,
+      text: `
+        UPDATE ${this._tableName} 
+        SET name = $1, year = $2, "updatedAt" = $3 
+        WHERE id = $4 RETURNING id
+      `,
       values: [name, year, updatedAt, id],
     };
 

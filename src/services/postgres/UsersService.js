@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthenticationError = require('../../exceptions/AuthenticationError');
 
 /**
  * @typedef {import('../_types/UsersServiceType').IUserEntity} IUserEntity
@@ -98,6 +99,34 @@ class UsersService {
     }
 
     return result.rows[0];
+  }
+
+  /**
+   * @param {string} username
+   * @param {string} password
+   */
+  async verifyUserCredential(username, password) {
+    const query = {
+      text: `SELECT id,password FROM ${this._tableName} WHERE username = $1`,
+      values: [username],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new AuthenticationError('Kredential yang anda berikan salah');
+    }
+
+    const { id, password: hashedPassword } =
+      /** @type {{id: string, password: string}} */ (result.rows[0]);
+
+    const match = await bcrypt.compare(password, hashedPassword);
+
+    if (!match) {
+      throw new AuthenticationError('Kredential yang anda berikan salah');
+    }
+
+    return id;
   }
 }
 

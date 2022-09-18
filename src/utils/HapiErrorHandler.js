@@ -20,6 +20,8 @@ const hapiErrorHandler = (h, error) => {
     responseData.status = 'fail';
     responseData.message = error.message;
     code = error.statusCode;
+  } else {
+    console.log(error.message);
   }
 
   const response = h.response(responseData);

@@ -1,17 +1,17 @@
 // @ts-check
 
 const UsersHandler = require('./handler');
-const userRoutes = require('./routes');
+const routes = require('./routes');
 
 /**
  * @typedef {import('../../services/_types/UsersServiceType').IUsersService} IUsersService
- * @typedef {import('../../validator/users')} UserValidator
+ * @typedef {import('../../validator/users')} UsersValidator
  */
 
 /**
  * @typedef {object} IUsersPlugin
  * @property {IUsersService} service
- * @property {UserValidator} validator
+ * @property {UsersValidator} validator
  */
 
 /**
@@ -22,7 +22,9 @@ const userHapiPlugin = {
   version: '1.0.0',
 
   register: async (server, { service, validator }) => {
-    server.route(userRoutes(new UsersHandler(service, validator)));
+    const usersHandler = new UsersHandler(service, validator);
+
+    server.route(routes(usersHandler));
   },
 };
 

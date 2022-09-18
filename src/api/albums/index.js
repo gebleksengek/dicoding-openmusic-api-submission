@@ -1,17 +1,17 @@
 // @ts-check
 
 const AlbumsHandler = require('./handler');
-const albumRoutes = require('./routes');
+const routes = require('./routes');
 
 /**
  * @typedef {import('../../services/_types/AlbumsServiceType').IAlbumsService} IAlbumsService
- * @typedef {import('../../validator/albums')} AlbumValidator
+ * @typedef {import('../../validator/albums')} AlbumsValidator
  */
 
 /**
  * @typedef {object} IAlbumsPlugin
  * @property {IAlbumsService} service
- * @property {AlbumValidator} validator
+ * @property {AlbumsValidator} validator
  */
 
 /**
@@ -22,7 +22,9 @@ const albumHapiPlugin = {
   version: '1.0.0',
 
   register: async (server, { service, validator }) => {
-    server.route(albumRoutes(new AlbumsHandler(service, validator)));
+    const albumsHandler = new AlbumsHandler(service, validator);
+
+    server.route(routes(albumsHandler));
   },
 };
 

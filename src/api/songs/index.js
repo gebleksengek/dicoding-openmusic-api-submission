@@ -1,17 +1,17 @@
 // @ts-check
 
 const SongsHandler = require('./handler');
-const songRoutes = require('./routes');
+const routes = require('./routes');
 
 /**
  * @typedef {import('../../services/_types/SongsServiceType').ISongsService} ISongsService
- * @typedef {import('../../validator/songs')} SongValidator
+ * @typedef {import('../../validator/songs')} SongsValidator
  */
 
 /**
  * @typedef {object} ISongsPlugin
  * @property {ISongsService} service
- * @property {SongValidator} validator
+ * @property {SongsValidator} validator
  */
 
 /**
@@ -22,7 +22,9 @@ const songHapiPlugin = {
   version: '1.0.0',
 
   register: async (server, { service, validator }) => {
-    server.route(songRoutes(new SongsHandler(service, validator)));
+    const songsHandler = new SongsHandler(service, validator);
+
+    server.route(routes(songsHandler));
   },
 };
 

@@ -16,6 +16,7 @@
  * @property {function(string): Promise<void> | void} verifyNewUsername
  * @property {function(IUserEntity): Promise<string> | string} addUser
  * @property {function(string): Promise<any> | any} getUserById
+ * @property {function(string,string): Promise<string> | string} verifyUserCredential
  */
 
 module.exports = {};

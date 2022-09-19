@@ -4,7 +4,7 @@
  * @typedef {import('node-pg-migrate').MigrationBuilder} MigrationBuilder
  */
 
-const table_name = 'playlist_songs';
+const table_name = 'collaborations';
 
 /**
  * @param {MigrationBuilder} pgm
@@ -12,7 +12,7 @@ const table_name = 'playlist_songs';
 exports.up = (pgm) => {
   pgm.createTable(table_name, {
     id: {
-      type: 'varchar(30)',
+      type: 'varchar(23)',
       primaryKey: true,
     },
     playlist_id: {
@@ -22,10 +22,10 @@ exports.up = (pgm) => {
       onUpdate: 'cascade',
       onDelete: 'cascade',
     },
-    song_id: {
+    user_id: {
       type: 'varchar(21)',
       notNull: true,
-      references: 'songs(id)',
+      references: 'users(id)',
       onUpdate: 'cascade',
       onDelete: 'cascade',
     },
@@ -41,12 +41,13 @@ exports.up = (pgm) => {
 
   pgm.addConstraint(
     table_name,
-    `unique_${table_name}_playlist_id_and_song_id`,
-    'UNIQUE(playlist_id, song_id)'
+    `unique_${table_name}_playlist_id_and_user_id`,
+    'UNIQUE(playlist_id, user_id)'
   );
 };
 
 /**
+ *
  * @param {MigrationBuilder} pgm
  */
 exports.down = (pgm) => {

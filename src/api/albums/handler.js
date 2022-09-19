@@ -2,8 +2,6 @@
 
 const autoBind = require('auto-bind');
 
-const { hapiErrorHandler } = require('../../utils/HapiErrorHandler');
-
 /**
  * @typedef {import('@hapi/hapi').Request} Request
  * @typedef {import('@hapi/hapi').ResponseToolkit} ResponseToolkit
@@ -40,88 +38,69 @@ class AlbumsHandler {
    * @param {ResponseToolkit} h
    */
   async postAlbumHandler(request, h) {
-    try {
-      this._validator.validateAlbumPayload(request.payload);
+    this._validator.validateAlbumPayload(request.payload);
 
-      const { name, year } = /** @type {IAlbumEntity} */ (request.payload);
+    const { name, year } = /** @type {IAlbumEntity} */ (request.payload);
 
-      const albumId = await this._service.addAlbum({ name, year });
+    const albumId = await this._service.addAlbum({ name, year });
 
-      const response = h.response({
-        status: 'success',
-        message: 'Album berhasil ditambahkan',
-        data: {
-          albumId,
-        },
-      });
-      response.code(201);
+    const response = h.response({
+      status: 'success',
+      message: 'Album berhasil ditambahkan',
+      data: {
+        albumId,
+      },
+    });
+    response.code(201);
 
-      return response;
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return response;
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async getAlbumByIdHandler(request, h) {
-    try {
-      const { id } = /** @type {{id: string}} */ (request.params);
+  async getAlbumByIdHandler(request) {
+    const { id } = /** @type {{id: string}} */ (request.params);
 
-      const album = await this._service.getAlbumById(id);
+    const album = await this._service.getAlbumById(id);
 
-      return {
-        status: 'success',
-        data: {
-          album,
-        },
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      data: {
+        album,
+      },
+    };
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async putAlbumByIdHandler(request, h) {
-    try {
-      this._validator.validateAlbumPayload(request.payload);
+  async putAlbumByIdHandler(request) {
+    this._validator.validateAlbumPayload(request.payload);
 
-      const { id } = /** @type {{id: string}} */ (request.params);
-      const { name, year } = /** @type {IAlbumEntity} */ (request.payload);
+    const { id } = /** @type {{id: string}} */ (request.params);
+    const { name, year } = /** @type {IAlbumEntity} */ (request.payload);
 
-      await this._service.editAlbumById(id, { name, year });
+    await this._service.editAlbumById(id, { name, year });
 
-      return {
-        status: 'success',
-        message: 'Album berhasil diperbarui',
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      message: 'Album berhasil diperbarui',
+    };
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async deleteAlbumByIdHandler(request, h) {
-    try {
-      const { id } = /** @type {{id: string}} */ (request.params);
+  async deleteAlbumByIdHandler(request) {
+    const { id } = /** @type {{id: string}} */ (request.params);
 
-      await this._service.deleteAlbumById(id);
+    await this._service.deleteAlbumById(id);
 
-      return {
-        status: 'success',
-        message: 'Album berhasil dihapus',
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      message: 'Album berhasil dihapus',
+    };
   }
 }
 

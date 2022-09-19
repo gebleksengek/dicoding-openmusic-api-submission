@@ -5,6 +5,8 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 
+const { hapiErrorHandler } = require('./utils/HapiErrorHandler');
+
 const albumHapiPlugin = require('./api/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
 const AlbumsValidator = require('./validator/albums');
@@ -25,6 +27,10 @@ const playlistHapiPlugin = require('./api/playlists');
 const PlaylistsService = require('./services/postgres/PlaylistsService');
 const PlaylistsValidator = require('./validator/playlists');
 
+const PlaylistSongsService = require('./services/postgres/PlaylistSongsService');
+
+const CollaborationsService = require('./services/postgres/CollaborationsService');
+
 const TokenManager = require('./tokenize/TokenManager');
 
 const init = async () => {
@@ -43,6 +49,8 @@ const init = async () => {
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
   const playlistsService = new PlaylistsService();
+  const collaborationsService = new CollaborationsService();
+  const playlistSongsService = new PlaylistSongsService(collaborationsService);
 
   await server.register(Jwt);
 
@@ -98,11 +106,20 @@ const init = async () => {
     {
       plugin: playlistHapiPlugin,
       options: {
-        service: playlistsService,
+        playlistsService,
+        playlistSongsService,
         validator: PlaylistsValidator,
       },
     },
   ]);
+
+  server.ext('onPreResponse', (request, h) => {
+    if (request.response instanceof Error) {
+      return hapiErrorHandler(h, request.response);
+    }
+
+    return h.continue;
+  });
 
   await server.start();
   console.log(`Server running on ${server.info.uri}`);

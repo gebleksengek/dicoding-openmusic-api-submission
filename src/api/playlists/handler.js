@@ -2,12 +2,11 @@
 
 const autoBind = require('auto-bind');
 
-const { hapiErrorHandler } = require('../../utils/HapiErrorHandler');
-
 /**
  * @typedef {import('@hapi/hapi').Request} Request
  * @typedef {import('@hapi/hapi').ResponseToolkit} ResponseToolkit
  * @typedef {import('../../services/_types/PlaylistsServiceType').IPlaylistsService} IPlaylistsService
+ * @typedef {import('../../services/_types/PlaylistSongsServiceType').IPlaylistSongsService} IPlaylistSongsService
  */
 
 class PlaylistsHandler {
@@ -15,7 +14,13 @@ class PlaylistsHandler {
    * @readonly
    * @private
    */
-  _service;
+  _playlistsService;
+
+  /**
+   * @readonly
+   * @private
+   */
+  _playlistSongsService;
 
   /**
    * @readonly
@@ -24,11 +29,13 @@ class PlaylistsHandler {
   _validator;
 
   /**
-   * @param {IPlaylistsService} service
+   * @param {IPlaylistsService} playlistsService
+   * @param {IPlaylistSongsService} playlistSongsService
    * @param {import('../../validator/playlists')} validator
    */
-  constructor(service, validator) {
-    this._service = service;
+  constructor(playlistsService, playlistSongsService, validator) {
+    this._playlistsService = playlistsService;
+    this._playlistSongsService = playlistSongsService;
     this._validator = validator;
 
     autoBind(this);
@@ -39,52 +46,136 @@ class PlaylistsHandler {
    * @param {ResponseToolkit} h
    */
   async postPlaylistHandler(request, h) {
-    try {
-      this._validator.validateCreatePlaylist(request.payload);
+    this._validator.validateCreatePlaylist(request.payload);
 
-      const { name } = /** @type {{name: string}} */ (request.payload);
-      const { userId: owner } = /** @type {{userId: string}} */ (
-        request.auth.credentials
-      );
+    const { name } = /** @type {{name: string}} */ (request.payload);
+    const { userId: owner } = /** @type {{userId: string}} */ (
+      request.auth.credentials
+    );
 
-      const playlistId = await this._service.addPlaylist({ owner, name });
+    const playlistId = await this._playlistsService.addPlaylist({
+      owner,
+      name,
+    });
 
-      const response = h.response({
-        status: 'success',
-        message: 'Playlist berhasil ditambahkan',
-        data: {
-          playlistId,
-        },
-      });
-      response.code(201);
+    const response = h.response({
+      status: 'success',
+      message: 'Playlist berhasil ditambahkan',
+      data: {
+        playlistId,
+      },
+    });
+    response.code(201);
 
-      return response;
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return response;
+  }
+
+  /**
+   * @param {Request} request
+   */
+  async getPlaylistsHandler(request) {
+    const { userId: owner } = /** @type {{userId: string}} */ (
+      request.auth.credentials
+    );
+
+    const playlists = await this._playlistsService.getPlaylists({ owner });
+
+    return {
+      status: 'success',
+      data: {
+        playlists,
+      },
+    };
+  }
+
+  /**
+   * @param {Request} request
+   */
+  async deletePlaylistByIdHandler(request) {
+    const { id } = /** @type {{id: string}} */ (request.params);
+    const { userId: owner } = /** @type {{userId: string}} */ (
+      request.auth.credentials
+    );
+
+    await this._playlistsService.verifyPlaylistOwner({ owner, id });
+    await this._playlistsService.deletePlaylistById({ id });
+
+    return {
+      status: 'success',
+      message: 'Playlist berhasil dihapus',
+    };
   }
 
   /**
    * @param {Request} request
    * @param {ResponseToolkit} h
    */
-  async getPlaylistsHandler(request, h) {
-    try {
-      const { userId: owner } = /** @type {{userId: string}} */ (
-        request.auth.credentials
-      );
+  async postPlaylistSongHandler(request, h) {
+    this._validator.validateAddPlaylistSong(request.payload);
 
-      const playlists = await this._service.getPlaylists({ owner });
+    const { id } = /** @type {{id: string}} */ (request.params);
+    const { songId } = /** @type {{songId: string}} */ (request.payload);
+    const { userId: owner } = /** @type {{userId: string}} */ (
+      request.auth.credentials
+    );
 
-      return {
-        status: 'success',
-        data: {
-          playlists,
-        },
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    await this._playlistsService.verifyPlaylistOwner({ owner, id });
+    await this._playlistSongsService.addPlaylistSong({
+      playlistId: id,
+      songId,
+    });
+
+    const response = h.response({
+      status: 'success',
+      message: 'Song berhasil ditambahkan ke playlist',
+    });
+    response.code(201);
+
+    return response;
+  }
+
+  /**
+   * @param {Request} request
+   */
+  async getPlaylistByIdHandler(request) {
+    const { id } = /** @type {{id: string}} */ (request.params);
+    const { userId: owner } = /** @type {{userId: string}} */ (
+      request.auth.credentials
+    );
+
+    await this._playlistsService.verifyPlaylistOwner({ owner, id });
+    const playlist = await this._playlistsService.getPlaylistById({ id });
+
+    return {
+      status: 'success',
+      data: {
+        playlist,
+      },
+    };
+  }
+
+  /**
+   * @param {Request} request
+   */
+  async deletePlaylistSongByIdHandler(request) {
+    this._validator.validateAddPlaylistSong(request.payload);
+
+    const { id } = /** @type {{id: string}} */ (request.params);
+    const { userId: owner } = /** @type {{userId: string}} */ (
+      request.auth.credentials
+    );
+    const { songId } = /** @type {{songId: string}} */ (request.payload);
+
+    await this._playlistsService.verifyPlaylistOwner({ owner, id });
+    await this._playlistSongsService.deletePlaylistSongById({
+      playlistId: id,
+      songId,
+    });
+
+    return {
+      status: 'success',
+      message: 'Song berhasil dihapus dari palylist',
+    };
   }
 }
 

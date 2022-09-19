@@ -12,6 +12,7 @@
     "migrate": "node-pg-migrate"
   },
   "dependencies": {
+    "@hapi/boom": "^10.0.0",
     "@hapi/hapi": "^20.2.2",
     "@hapi/jwt": "^3.0.0",
     "auto-bind": "^4.0.0",

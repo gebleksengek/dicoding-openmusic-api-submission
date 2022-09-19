@@ -7,7 +7,7 @@ const PostCreatePlaylistPayloadScheme = Joi.object({
 });
 
 const PostAddPlaylistSongPayloadScheme = Joi.object({
-  songId: Joi.string().length(21).required(),
+  songId: Joi.string().max(21).required(),
 });
 
 module.exports = {

@@ -83,7 +83,8 @@ class SongsService {
     const query = {
       text: `
         SELECT id,title,performer FROM ${this._tableName}
-        WHERE LOWER(title) LIKE $1
+        WHERE "deletedAt" IS NULL
+        AND LOWER(title) LIKE $1
         AND LOWER(performer) LIKE $2
       `,
       values: [`%${title}%`, `%${performer}%`],
@@ -101,7 +102,9 @@ class SongsService {
     const query = {
       text: `
         SELECT id,title,year,performer,genre,duration,"albumId"
-        FROM ${this._tableName} WHERE id = $1
+        FROM ${this._tableName} 
+        WHERE "deletedAt" IS NULL
+        AND id = $1
       `,
       values: [id],
     };
@@ -126,7 +129,9 @@ class SongsService {
         UPDATE ${this._tableName} 
         SET title = $1, year = $2, performer = $3, genre = $4, 
         duration = $5, "albumId" = $6, "updatedAt" = $7 
-        WHERE id = $8 RETURNING id
+        WHERE "deletedAt" IS NULL
+        AND id = $8
+        RETURNING id
       `,
       values: [title, year, performer, genre, duration, albumId, updatedAt, id],
     };
@@ -142,9 +147,18 @@ class SongsService {
    * @param {string} id
    */
   async deleteSongById(id) {
+    const deletedAt = new Date().toISOString();
+
     const query = {
-      text: `DELETE FROM ${this._tableName} WHERE id = $1 RETURNING id`,
-      values: [id],
+      // text: `DELETE FROM ${this._tableName} WHERE id = $1 RETURNING id`,
+      text: `
+        UPDATE ${this._tableName} 
+        SET "deletedAt" = $1
+        WHERE "deletedAt" IS NULL
+        AND id = $2
+        RETURNING id
+      `,
+      values: [deletedAt, id],
     };
 
     const result = await this._pool.query(query);

@@ -2,8 +2,6 @@
 
 const autoBind = require('auto-bind');
 
-const { hapiErrorHandler } = require('../../utils/HapiErrorHandler');
-
 /**
  * @typedef {import('@hapi/hapi').Request} Request
  * @typedef {import('@hapi/hapi').ResponseToolkit} ResponseToolkit
@@ -58,87 +56,73 @@ class AuthenticationsHandler {
    * @param {ResponseToolkit} h
    */
   async postAuthenticationHandler(request, h) {
-    try {
-      this._validator.validatePostAuthentication(request.payload);
+    this._validator.validatePostAuthentication(request.payload);
 
-      const { username, password } =
-        /** @type {{username: string, password: string}} */ (request.payload);
+    const { username, password } =
+      /** @type {{username: string, password: string}} */ (request.payload);
 
-      const userId = await this._usersService.verifyUserCredential(
-        username,
-        password
-      );
+    const userId = await this._usersService.verifyUserCredential(
+      username,
+      password
+    );
 
-      const accessToken = this._tokenManager.generateAccessToken({ userId });
-      const refreshToken = this._tokenManager.generateRefreshToken({ userId });
+    const accessToken = this._tokenManager.generateAccessToken({ userId });
+    const refreshToken = this._tokenManager.generateRefreshToken({ userId });
 
-      await this._authenticationsService.addRefreshToken(refreshToken);
+    await this._authenticationsService.addRefreshToken(refreshToken);
 
-      const response = h.response({
-        status: 'success',
-        message: 'Authentication behasil ditambahkan',
-        data: {
-          accessToken,
-          refreshToken,
-        },
-      });
-      response.code(201);
+    const response = h.response({
+      status: 'success',
+      message: 'Authentication behasil ditambahkan',
+      data: {
+        accessToken,
+        refreshToken,
+      },
+    });
+    response.code(201);
 
-      return response;
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return response;
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async putAuthenticationHandler(request, h) {
-    try {
-      this._validator.validatePutAuthencation(request.payload);
+  async putAuthenticationHandler(request) {
+    this._validator.validatePutAuthencation(request.payload);
 
-      const { refreshToken } = /** @type {{refreshToken: string}} */ (
-        request.payload
-      );
-      await this._authenticationsService.verifyRefreshToken(refreshToken);
-      const { userId } = this._tokenManager.verifyRefreshToken(refreshToken);
+    const { refreshToken } = /** @type {{refreshToken: string}} */ (
+      request.payload
+    );
+    await this._authenticationsService.verifyRefreshToken(refreshToken);
+    const { userId } = this._tokenManager.verifyRefreshToken(refreshToken);
 
-      const accessToken = this._tokenManager.generateAccessToken({ userId });
+    const accessToken = this._tokenManager.generateAccessToken({ userId });
 
-      return {
-        status: 'success',
-        message: 'Access Token berhasil diperbarui',
-        data: {
-          accessToken,
-        },
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      message: 'Access Token berhasil diperbarui',
+      data: {
+        accessToken,
+      },
+    };
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async deleteAuthenticationHandler(request, h) {
-    try {
-      this._validator.validateDeleteAuthentication(request.payload);
+  async deleteAuthenticationHandler(request) {
+    this._validator.validateDeleteAuthentication(request.payload);
 
-      const { refreshToken } = /** @type {{refreshToken: string}} */ (
-        request.payload
-      );
-      await this._authenticationsService.verifyRefreshToken(refreshToken);
-      await this._authenticationsService.deleteRefreshToken(refreshToken);
+    const { refreshToken } = /** @type {{refreshToken: string}} */ (
+      request.payload
+    );
+    await this._authenticationsService.verifyRefreshToken(refreshToken);
+    await this._authenticationsService.deleteRefreshToken(refreshToken);
 
-      return {
-        status: 'success',
-        message: 'Refresh token berhasil dihapus',
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      message: 'Refresh token berhasil dihapus',
+    };
   }
 }
 

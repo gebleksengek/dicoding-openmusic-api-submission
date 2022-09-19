@@ -1,5 +1,7 @@
 // @ts-check
 
+const { Boom } = require('@hapi/boom');
+
 const ClientError = require('../exceptions/ClientError');
 // const NotFoundError = require('../exceptions/NotFoundError');
 
@@ -20,6 +22,10 @@ const hapiErrorHandler = (h, error) => {
     responseData.status = 'fail';
     responseData.message = error.message;
     code = error.statusCode;
+  } else if (error instanceof Boom) {
+    responseData.status = 'fail';
+    responseData.message = error.message;
+    code = error.output.statusCode;
   } else {
     console.log(error.message);
   }

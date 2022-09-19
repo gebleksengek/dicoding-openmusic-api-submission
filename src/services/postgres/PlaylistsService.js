@@ -78,12 +78,27 @@ class PlaylistsService {
   }
 
   /**
-   * @param {{playlistId: string, owner: string}} param0
+   * @param {{id: string}} param0
    */
-  async verifyPlaylistOwner({ playlistId, owner }) {
+  async getPlaylistById({ id }) {
     const query = {
-      text: `SELECT owner FROM ${this._tableName} WHERE id = $1`,
-      values: [playlistId],
+      text: `
+        SELECT p.id, p.name, u.username, COALESCE(
+          json_agg(
+            json_build_object(
+              'id', s.id,
+              'title', s.title,
+              'performer', s.performer
+            )
+          ) FILTER (WHERE s.id IS NOT NULL),
+        '[]') as songs
+        FROM ${this._tableName} p
+        JOIN users u ON p.owner = u.id
+        JOIN playlist_songs ps ON ps.playlist_id = p.id
+        JOIN songs s ON s.id = ps.song_id
+        WHERE p.id = $1 GROUP BY 1,2,3
+      `,
+      values: [id],
     };
 
     const result = await this._pool.query(query);
@@ -92,10 +107,66 @@ class PlaylistsService {
       throw new NotFoundError('Playlist tidak ditemukan');
     }
 
-    const playlist = /** @type {{onwer: string}} */ (result.rows[0]);
+    return result.rows[0];
+  }
 
-    if (playlist.onwer !== owner) {
+  /**
+   *
+   * @param {{id: string}} param0
+   */
+  async deletePlaylistById({ id }) {
+    const query = {
+      text: `
+        DELETE FROM ${this._tableName}
+        WHERE id = $1
+        RETURNING id
+      `,
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Playlist gagal dihapus. Id tidak ditemukan');
+    }
+  }
+
+  /**
+   * @param {{id: string, owner: string}} param0
+   */
+  async verifyPlaylistOwner({ id, owner }) {
+    const query = {
+      text: `SELECT owner FROM ${this._tableName} WHERE id = $1`,
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Playlist tidak ditemukan');
+    }
+
+    const playlist = /** @type {{owner: string}} */ (result.rows[0]);
+
+    if (playlist.owner !== owner) {
       throw new AuthroizationError('Anda tidak berhak mengakses resource ini');
+    }
+  }
+
+  /**
+   *
+   * @param {{playlistId: string, userId: string}} param0
+   */
+  async verifyPlaylistAccess({ playlistId, userId }) {
+    try {
+      this.verifyPlaylistOwner({ id: playlistId, owner: userId });
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      
+      try {
+      }
     }
   }
 }

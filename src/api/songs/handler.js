@@ -2,8 +2,6 @@
 
 const autoBind = require('auto-bind');
 
-const { hapiErrorHandler } = require('../../utils/HapiErrorHandler');
-
 /**
  * @typedef {import('@hapi/hapi').Request} Request
  * @typedef {import('@hapi/hapi').ResponseToolkit} ResponseToolkit
@@ -42,112 +40,86 @@ class SongsHandler {
    * @param {ResponseToolkit} h
    */
   async postSongHandler(request, h) {
-    try {
-      this._validator.validateSongPayload(request.payload);
+    this._validator.validateSongPayload(request.payload);
 
-      const songId = await this._service.addSong(
-        /** @type {ISongEntity} */ (request.payload)
-      );
+    const songId = await this._service.addSong(
+      /** @type {ISongEntity} */ (request.payload)
+    );
 
-      const response = h.response({
-        status: 'success',
-        message: 'Song berhasil ditambahkan',
-        data: {
-          songId,
-        },
-      });
-      response.code(201);
+    const response = h.response({
+      status: 'success',
+      message: 'Song berhasil ditambahkan',
+      data: {
+        songId,
+      },
+    });
+    response.code(201);
 
-      return response;
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return response;
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async getSongsHandler(request, h) {
-    try {
-      const { title, performer } = /** @type {ISongsGetQuery} */ (
-        request.query
-      );
+  async getSongsHandler(request) {
+    const { title, performer } = /** @type {ISongsGetQuery} */ (request.query);
 
-      const songs = await this._service.getSongs({ title, performer });
+    const songs = await this._service.getSongs({ title, performer });
 
-      return {
-        status: 'success',
-        data: {
-          songs,
-        },
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      data: {
+        songs,
+      },
+    };
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async getSongByIdHandler(request, h) {
-    try {
-      const { id } = /** @type {{id: string}} */ (request.params);
+  async getSongByIdHandler(request) {
+    const { id } = /** @type {{id: string}} */ (request.params);
 
-      const song = await this._service.getSongById(id);
+    const song = await this._service.getSongById(id);
 
-      return {
-        status: 'success',
-        data: {
-          song,
-        },
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      data: {
+        song,
+      },
+    };
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async putSongByIdHandler(request, h) {
-    try {
-      this._validator.validateSongPayload(request.payload);
-      const { id } = /** @type {{id:string}} */ (request.params);
+  async putSongByIdHandler(request) {
+    this._validator.validateSongPayload(request.payload);
+    const { id } = /** @type {{id:string}} */ (request.params);
 
-      await this._service.editSongById(
-        id,
-        /** @type {ISongEntity} */ (request.payload)
-      );
+    await this._service.editSongById(
+      id,
+      /** @type {ISongEntity} */ (request.payload)
+    );
 
-      return {
-        status: 'success',
-        message: 'Song berhasil diperbarui',
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      message: 'Song berhasil diperbarui',
+    };
   }
 
   /**
    * @param {Request} request
-   * @param {ResponseToolkit} h
    */
-  async deleteAlbumByIdHandler(request, h) {
-    try {
-      const { id } = /** @type {{id: string}} */ (request.params);
+  async deleteAlbumByIdHandler(request) {
+    const { id } = /** @type {{id: string}} */ (request.params);
 
-      await this._service.deleteSongById(id);
+    await this._service.deleteSongById(id);
 
-      return {
-        status: 'success',
-        message: 'Song berhasil dihapus',
-      };
-    } catch (error) {
-      return hapiErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      message: 'Song berhasil dihapus',
+    };
   }
 }
 

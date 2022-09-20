@@ -76,9 +76,12 @@ class PlaylistsService {
   async getPlaylists({ owner }) {
     const query = {
       text: `
-        SELECT playlists.id, playlists.name, users.username FROM ${this._tableName}
-        JOIN users ON playlists.owner = users.id
-        WHERE playlists.owner = $1
+        SELECT p.id, p.name, u.username 
+        FROM ${this._tableName} p
+        LEFT JOIN users u ON p.owner = u.id
+        LEFT JOIN collaborations c ON c.playlist_id = p.id
+        WHERE p.owner = $1
+        OR c.user_id = $1
       `,
       values: [owner],
     };
@@ -101,7 +104,10 @@ class PlaylistsService {
               'title', s.title,
               'performer', s.performer
             )
-          ) FILTER (WHERE s."deletedAt" IS NULL),
+          ) FILTER (
+            WHERE s."deletedAt" IS NULL
+            AND s."id" IS NOT NULL
+            ),
         '[]') as songs
         FROM ${this._tableName} p
         LEFT JOIN users u ON p.owner = u.id

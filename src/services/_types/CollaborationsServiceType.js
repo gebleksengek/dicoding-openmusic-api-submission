@@ -1,10 +1,16 @@
 // @ts-check
 
 /**
+ * @typedef {object} ICollaborationEntity
+ * @property {string} playlistId
+ * @property {string} userId
+ */
+
+/**
  * @typedef {object} ICollaborationsService
- * @property {function({playlistId:  string, userId: string}): Promise<string> | string} addCollaboration
- * @property {function({playlistId: string, userId: string}): Promise<void> | void} deleteCollaboration
- * @property {function({playlistId: string, userId: string}): Promise<void> | void} verifyCollaboration
+ * @property {function(ICollaborationEntity): Promise<string> | string} addCollaboration
+ * @property {function(ICollaborationEntity): Promise<void> | void} deleteCollaboration
+ * @property {function(ICollaborationEntity): Promise<void> | void} verifyCollaboration
  */
 
 module.exports = {};

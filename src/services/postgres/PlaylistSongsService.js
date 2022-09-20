@@ -7,6 +7,7 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 
 /**
  * @typedef {import('../_types/PlaylistSongsServiceType').IPlaylistSongsService} IPlaylistSongsService
+ * @typedef {import('../_types/PlaylistSongActivitiesServiceType').IPSAService} IPSAService
  */
 
 /**
@@ -31,25 +32,34 @@ class PlaylistSongsService {
    */
   _prefixId = 'playlist_song-';
 
-  constructor() {
+  /**
+   * @readonly
+   * @private
+   */
+  _psaService;
+
+  /**
+   * @param {IPSAService} psaService
+   */
+  constructor(psaService) {
     this._pool = new Pool();
+    this._psaService = psaService;
   }
 
   /**
-   * @param {{playlistId: string, songId: string}} param0
+   * @param {{playlistId: string, songId: string, userId: string}} param0
    */
-  async addPlaylistSong({ playlistId, songId }) {
+  async addPlaylistSong({ playlistId, songId, userId }) {
     const id = this._prefixId + nanoid(16);
     const createdAt = new Date().toISOString();
     const updatedAt = createdAt;
 
-    // VALUES($1, $2, $3, $4, $5)
     const query = {
       text: `
           INSERT INTO ${this._tableName} 
           SELECT $1, $2, $3, $4, $5
           WHERE EXISTS (
-            SELECT 1 from songs
+            SELECT 1 FROM songs
             WHERE "deletedAt" IS NULL
             AND "id" = $6
           )
@@ -66,13 +76,20 @@ class PlaylistSongsService {
       );
     }
 
+    await this._psaService.addActivity({
+      playlistId,
+      songId,
+      userId,
+      action: 'add',
+    });
+
     return result.rows[0].id;
   }
 
   /**
-   * @param {{playlistId: string, songId: string}} param0
+   * @param {{playlistId: string, songId: string, userId: string}} param0
    */
-  async deletePlaylistSongById({ playlistId, songId }) {
+  async deletePlaylistSongById({ playlistId, songId, userId }) {
     const query = {
       text: `
         DELETE FROM ${this._tableName}
@@ -89,6 +106,13 @@ class PlaylistSongsService {
         'Song gagal dihapus dari playlist. Id song tidak ditemukan'
       );
     }
+
+    await this._psaService.addActivity({
+      playlistId,
+      songId,
+      userId,
+      action: 'delete',
+    });
   }
 }
 

@@ -7,6 +7,7 @@ const autoBind = require('auto-bind');
  * @typedef {import('@hapi/hapi').ResponseToolkit} ResponseToolkit
  * @typedef {import('../../services/_types/PlaylistsServiceType').IPlaylistsService} IPlaylistsService
  * @typedef {import('../../services/_types/PlaylistSongsServiceType').IPlaylistSongsService} IPlaylistSongsService
+ * @typedef {import('../../services/_types/PlaylistSongActivitiesServiceType').IPSAService} IPSAService
  */
 
 class PlaylistsHandler {
@@ -26,16 +27,24 @@ class PlaylistsHandler {
    * @readonly
    * @private
    */
+  _psaService;
+
+  /**
+   * @readonly
+   * @private
+   */
   _validator;
 
   /**
    * @param {IPlaylistsService} playlistsService
    * @param {IPlaylistSongsService} playlistSongsService
+   * @param {IPSAService} psaService
    * @param {import('../../validator/playlists')} validator
    */
-  constructor(playlistsService, playlistSongsService, validator) {
+  constructor(playlistsService, playlistSongsService, psaService, validator) {
     this._playlistsService = playlistsService;
     this._playlistSongsService = playlistSongsService;
+    this._psaService = psaService;
     this._validator = validator;
 
     autoBind(this);
@@ -92,13 +101,16 @@ class PlaylistsHandler {
    * @param {Request} request
    */
   async deletePlaylistByIdHandler(request) {
-    const { id: playlistId } = /** @type {{id: string}} */ (request.params);
-    const { userId } = /** @type {{userId: string}} */ (
+    const { id } = /** @type {{id: string}} */ (request.params);
+    const { userId: owner } = /** @type {{userId: string}} */ (
       request.auth.credentials
     );
 
-    await this._playlistsService.verifyPlaylistAccess({ userId, playlistId });
-    await this._playlistsService.deletePlaylistById({ id: playlistId });
+    await this._playlistsService.verifyPlaylistOwner({
+      owner,
+      id,
+    });
+    await this._playlistsService.deletePlaylistById({ id });
 
     return {
       status: 'success',
@@ -123,6 +135,7 @@ class PlaylistsHandler {
     await this._playlistSongsService.addPlaylistSong({
       playlistId,
       songId,
+      userId,
     });
 
     const response = h.response({
@@ -173,11 +186,36 @@ class PlaylistsHandler {
     await this._playlistSongsService.deletePlaylistSongById({
       playlistId,
       songId,
+      userId,
     });
 
     return {
       status: 'success',
       message: 'Song berhasil dihapus dari palylist',
+    };
+  }
+
+  /**
+   * @param {Request} request
+   */
+  async getPlaylistActivitiesByIdHandler(request) {
+    const { id: playlistId } = /** @type {{id: string}} */ (request.params);
+    const { userId } = /** @type {{userId: string}} */ (
+      request.auth.credentials
+    );
+
+    await this._playlistsService.verifyPlaylistAccess({ userId, playlistId });
+
+    const activities = await this._psaService.getActivitiesByPlaylistId({
+      playlistId,
+    });
+
+    return {
+      status: 'success',
+      data: {
+        playlistId,
+        activities,
+      },
     };
   }
 }

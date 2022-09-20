@@ -6,6 +6,7 @@ const routes = require('./routes');
 /**
  * @typedef {import('../../services/_types/PlaylistsServiceType').IPlaylistsService} IPlaylistsService
  * @typedef {import('../../services/_types/PlaylistSongsServiceType').IPlaylistSongsService} IPlaylistSongsService
+ * @typedef {import('../../services/_types/PlaylistSongActivitiesServiceType').IPSAService} IPSAService
  * @typedef {import('../../validator/playlists')} PlaylistsValidator
  */
 
@@ -13,6 +14,7 @@ const routes = require('./routes');
  * @typedef {object} IPlaylistsPlugin
  * @property {IPlaylistsService} playlistsService
  * @property {IPlaylistSongsService} playlistSongsService
+ * @property {IPSAService} psaService
  * @property {PlaylistsValidator} validator
  */
 
@@ -25,11 +27,12 @@ const playlistHapiPlugin = {
 
   register: async (
     server,
-    { playlistsService, playlistSongsService, validator }
+    { playlistsService, playlistSongsService, psaService, validator }
   ) => {
     const playlistsHandler = new PlaylistsHandler(
       playlistsService,
       playlistSongsService,
+      psaService,
       validator
     );
 

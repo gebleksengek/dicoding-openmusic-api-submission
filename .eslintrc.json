@@ -9,7 +9,10 @@
     "plugin:jsdoc/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["prettier"],
+  "plugins": [
+    "prettier",
+    "sort-requires"
+  ],
   "overrides": [],
   "parserOptions": {
     "ecmaVersion": "latest"
@@ -25,6 +28,7 @@
     "no-underscore-dangle": "off",
     "jsdoc/require-param-description": "off",
     "jsdoc/require-property-description": "off",
-    "jsdoc/require-returns-description": "off"
+    "jsdoc/require-returns-description": "off",
+    "sort-requires/sort-requires": "error"
   }
 }

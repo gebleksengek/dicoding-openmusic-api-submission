@@ -1,8 +1,8 @@
 // @ts-check
 
-const InvariantError = require('../../exceptions/InvariantError');
-
 const { AlbumPayloadScheme } = require('./scheme');
+
+const InvariantError = require('../../exceptions/InvariantError');
 
 const AlbumsValidator = {
   validateAlbumPayload: (payload) => {

@@ -1,12 +1,12 @@
 // @ts-check
 
-const InvariantError = require('../../exceptions/InvariantError');
-
 const {
+  DeleteAuthenticationPayloadScheme,
   PostAuthenticationPayloadScheme,
   PutAuthenticationPayloadScheme,
-  DeleteAuthenticationPayloadScheme,
 } = require('./scheme');
+
+const InvariantError = require('../../exceptions/InvariantError');
 
 const AuthenticationsValidator = {
   validatePostAuthentication: (payload) => {

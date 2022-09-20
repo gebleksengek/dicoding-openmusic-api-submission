@@ -5,11 +5,24 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 
-const { hapiErrorHandler } = require('./utils/HapiErrorHandler');
-
 const albumHapiPlugin = require('./api/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
 const AlbumsValidator = require('./validator/albums');
+
+const authenticationsHapiPlugin = require('./api/authentications');
+const AuthenticationsService = require('./services/postgres/AuthenticationsService');
+const AuthenticationsValidator = require('./validator/authentications');
+
+const collaborationHapiPlugin = require('./api/collaborations');
+const CollaborationsService = require('./services/postgres/CollaborationsService');
+const CollaborationsValidator = require('./validator/collaborations');
+
+const playlistHapiPlugin = require('./api/playlists');
+const PlaylistSongsService = require('./services/postgres/PlaylistSongsService');
+const PlaylistsService = require('./services/postgres/PlaylistsService');
+const PlaylistsValidator = require('./validator/playlists');
+
+const PSAService = require('./services/postgres/PlaylistSongActivitiesService');
 
 const songHapiPlugin = require('./api/songs');
 const SongsService = require('./services/postgres/SongsService');
@@ -19,21 +32,7 @@ const userHapiPlugin = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
 const UsersValidator = require('./validator/users');
 
-const authenticationsHapiPlugin = require('./api/authentications');
-const AuthenticationsService = require('./services/postgres/AuthenticationsService');
-const AuthenticationsValidator = require('./validator/authentications');
-
-const playlistHapiPlugin = require('./api/playlists');
-const PlaylistsService = require('./services/postgres/PlaylistsService');
-const PlaylistsValidator = require('./validator/playlists');
-
-const PlaylistSongsService = require('./services/postgres/PlaylistSongsService');
-
-const PSAService = require('./services/postgres/PlaylistSongActivitiesService');
-
-const collaborationHapiPlugin = require('./api/collaborations');
-const CollaborationsService = require('./services/postgres/CollaborationsService');
-const CollaborationsValidator = require('./validator/collaborations');
+const { hapiErrorHandler } = require('./utils/HapiErrorHandler');
 
 const TokenManager = require('./tokenize/TokenManager');
 

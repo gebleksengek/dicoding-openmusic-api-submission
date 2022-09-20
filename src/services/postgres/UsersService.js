@@ -1,12 +1,12 @@
 // @ts-check
 
-const { Pool } = require('pg');
-const { nanoid } = require('nanoid');
 const bcrypt = require('bcrypt');
+const { nanoid } = require('nanoid');
+const { Pool } = require('pg');
 
+const AuthenticationError = require('../../exceptions/AuthenticationError');
 const InvariantError = require('../../exceptions/InvariantError');
 const NotFoundError = require('../../exceptions/NotFoundError');
-const AuthenticationError = require('../../exceptions/AuthenticationError');
 
 /**
  * @typedef {import('../_types/UsersServiceType').IUserEntity} IUserEntity

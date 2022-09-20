@@ -1,7 +1,7 @@
 // @ts-check
 
-const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
+const { Pool } = require('pg');
 
 const AuthroizationError = require('../../exceptions/AuthorizationError');
 const InvariantError = require('../../exceptions/InvariantError');

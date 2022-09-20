@@ -1,7 +1,7 @@
 // @ts-check
 
-const SongsHandler = require('./handler');
 const routes = require('./routes');
+const SongsHandler = require('./handler');
 
 /**
  * @typedef {import('../../services/_types/SongsServiceType').ISongsService} ISongsService

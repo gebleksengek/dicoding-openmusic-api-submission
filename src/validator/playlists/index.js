@@ -1,11 +1,11 @@
 // @ts-check
 
-const InvariantError = require('../../exceptions/InvariantError');
-
 const {
-  PostCreatePlaylistPayloadScheme,
   PostAddPlaylistSongPayloadScheme,
+  PostCreatePlaylistPayloadScheme,
 } = require('./scheme');
+
+const InvariantError = require('../../exceptions/InvariantError');
 
 const PlaylistsValidator = {
   validateCreatePlaylist: (payload) => {

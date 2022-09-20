@@ -1,7 +1,7 @@
 // @ts-check
 
-const UsersHandler = require('./handler');
 const routes = require('./routes');
+const UsersHandler = require('./handler');
 
 /**
  * @typedef {import('../../services/_types/UsersServiceType').IUsersService} IUsersService

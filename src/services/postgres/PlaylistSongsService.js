@@ -7,7 +7,6 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 
 /**
  * @typedef {import('../_types/PlaylistSongsServiceType').IPlaylistSongsService} IPlaylistSongsService
- * @typedef {import('../_types/CollaborationsServiceType').ICollaborationsService} ICollaborationsService
  */
 
 /**
@@ -32,18 +31,8 @@ class PlaylistSongsService {
    */
   _prefixId = 'playlist_song-';
 
-  /**
-   * @readonly
-   * @private
-   */
-  _collaborationsService;
-
-  /**
-   * @param {ICollaborationsService} collaborationsService
-   */
-  constructor(collaborationsService) {
+  constructor() {
     this._pool = new Pool();
-    this._collaborationsService = collaborationsService;
   }
 
   /**

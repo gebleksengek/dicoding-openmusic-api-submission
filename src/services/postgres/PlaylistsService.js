@@ -9,6 +9,7 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 
 /**
  * @typedef {import('../_types/PlaylistsServiceType').IPlaylistsService} IPlaylistsService
+ * @typedef {import('../_types/CollaborationsServiceType').ICollaborationsService} ICollaborationsService
  */
 
 /**
@@ -33,8 +34,18 @@ class PlaylistsService {
    */
   _prefixId = 'playlist-';
 
-  constructor() {
+  /**
+   * @readonly
+   * @private
+   */
+  _collaborationsService;
+
+  /**
+   * @param {ICollaborationsService} collaborationsService
+   */
+  constructor(collaborationsService) {
     this._pool = new Pool();
+    this._collaborationsService = collaborationsService;
   }
 
   /**
@@ -90,12 +101,12 @@ class PlaylistsService {
               'title', s.title,
               'performer', s.performer
             )
-          ) FILTER (WHERE s.id IS NOT NULL),
+          ) FILTER (WHERE s."deletedAt" IS NULL),
         '[]') as songs
         FROM ${this._tableName} p
-        JOIN users u ON p.owner = u.id
-        JOIN playlist_songs ps ON ps.playlist_id = p.id
-        JOIN songs s ON s.id = ps.song_id
+        LEFT JOIN users u ON p.owner = u.id
+        LEFT JOIN playlist_songs ps ON ps.playlist_id = p.id
+        LEFT JOIN songs s ON s.id = ps.song_id
         WHERE p.id = $1 GROUP BY 1,2,3
       `,
       values: [id],
@@ -159,13 +170,19 @@ class PlaylistsService {
    */
   async verifyPlaylistAccess({ playlistId, userId }) {
     try {
-      this.verifyPlaylistOwner({ id: playlistId, owner: userId });
+      await this.verifyPlaylistOwner({ id: playlistId, owner: userId });
     } catch (error) {
       if (error instanceof NotFoundError) {
         throw error;
       }
-      
+
       try {
+        await this._collaborationsService.verifyCollaboration({
+          playlistId,
+          userId,
+        });
+      } catch {
+        throw error;
       }
     }
   }

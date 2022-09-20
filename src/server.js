@@ -48,9 +48,9 @@ const init = async () => {
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
-  const playlistsService = new PlaylistsService();
   const collaborationsService = new CollaborationsService();
-  const playlistSongsService = new PlaylistSongsService(collaborationsService);
+  const playlistsService = new PlaylistsService(collaborationsService);
+  const playlistSongsService = new PlaylistSongsService();
 
   await server.register(Jwt);
 

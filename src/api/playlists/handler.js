@@ -92,13 +92,13 @@ class PlaylistsHandler {
    * @param {Request} request
    */
   async deletePlaylistByIdHandler(request) {
-    const { id } = /** @type {{id: string}} */ (request.params);
-    const { userId: owner } = /** @type {{userId: string}} */ (
+    const { id: playlistId } = /** @type {{id: string}} */ (request.params);
+    const { userId } = /** @type {{userId: string}} */ (
       request.auth.credentials
     );
 
-    await this._playlistsService.verifyPlaylistOwner({ owner, id });
-    await this._playlistsService.deletePlaylistById({ id });
+    await this._playlistsService.verifyPlaylistAccess({ userId, playlistId });
+    await this._playlistsService.deletePlaylistById({ id: playlistId });
 
     return {
       status: 'success',
@@ -113,15 +113,15 @@ class PlaylistsHandler {
   async postPlaylistSongHandler(request, h) {
     this._validator.validateAddPlaylistSong(request.payload);
 
-    const { id } = /** @type {{id: string}} */ (request.params);
+    const { id: playlistId } = /** @type {{id: string}} */ (request.params);
     const { songId } = /** @type {{songId: string}} */ (request.payload);
-    const { userId: owner } = /** @type {{userId: string}} */ (
+    const { userId } = /** @type {{userId: string}} */ (
       request.auth.credentials
     );
 
-    await this._playlistsService.verifyPlaylistOwner({ owner, id });
+    await this._playlistsService.verifyPlaylistAccess({ userId, playlistId });
     await this._playlistSongsService.addPlaylistSong({
-      playlistId: id,
+      playlistId,
       songId,
     });
 
@@ -139,11 +139,14 @@ class PlaylistsHandler {
    */
   async getPlaylistByIdHandler(request) {
     const { id } = /** @type {{id: string}} */ (request.params);
-    const { userId: owner } = /** @type {{userId: string}} */ (
+    const { userId } = /** @type {{userId: string}} */ (
       request.auth.credentials
     );
 
-    await this._playlistsService.verifyPlaylistOwner({ owner, id });
+    await this._playlistsService.verifyPlaylistAccess({
+      userId,
+      playlistId: id,
+    });
     const playlist = await this._playlistsService.getPlaylistById({ id });
 
     return {
@@ -160,15 +163,15 @@ class PlaylistsHandler {
   async deletePlaylistSongByIdHandler(request) {
     this._validator.validateAddPlaylistSong(request.payload);
 
-    const { id } = /** @type {{id: string}} */ (request.params);
-    const { userId: owner } = /** @type {{userId: string}} */ (
+    const { id: playlistId } = /** @type {{id: string}} */ (request.params);
+    const { userId } = /** @type {{userId: string}} */ (
       request.auth.credentials
     );
     const { songId } = /** @type {{songId: string}} */ (request.payload);
 
-    await this._playlistsService.verifyPlaylistOwner({ owner, id });
+    await this._playlistsService.verifyPlaylistAccess({ userId, playlistId });
     await this._playlistSongsService.deletePlaylistSongById({
-      playlistId: id,
+      playlistId,
       songId,
     });
 

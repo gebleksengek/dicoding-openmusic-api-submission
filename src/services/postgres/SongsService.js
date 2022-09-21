@@ -45,25 +45,14 @@ class SongsService {
   async addSong({ title, year, genre, performer, duration, albumId }) {
     const id = this._prefixId + nanoid(16);
     const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
 
     const query = {
       text: `
         INSERT INTO ${this._tableName} 
-        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+        VALUES($1, $2, $3, $4, $5, $6, $7, $8, $8) 
         RETURNING id
       `,
-      values: [
-        id,
-        title,
-        year,
-        performer,
-        genre,
-        duration,
-        albumId,
-        createdAt,
-        updatedAt,
-      ],
+      values: [id, title, year, performer, genre, duration, albumId, createdAt],
     };
 
     const result = await this._pool.query(query);
@@ -82,17 +71,18 @@ class SongsService {
   async getSongs({ title = '', performer = '' }) {
     const query = {
       text: `
-        SELECT id,title,performer FROM ${this._tableName}
+        SELECT id, title, performer 
+        FROM ${this._tableName}
         WHERE "deletedAt" IS NULL
-        AND LOWER(title) LIKE $1
-        AND LOWER(performer) LIKE $2
+        AND title ILIKE $1
+        AND performer ILIKE $2
       `,
       values: [`%${title}%`, `%${performer}%`],
     };
 
-    const result = await this._pool.query(query);
+    const { rows } = await this._pool.query(query);
 
-    return result.rows;
+    return rows;
   }
 
   /**
@@ -101,7 +91,7 @@ class SongsService {
   async getSongById(id) {
     const query = {
       text: `
-        SELECT id,title,year,performer,genre,duration,"albumId"
+        SELECT id, title, year, performer, genre, duration, "albumId"
         FROM ${this._tableName} 
         WHERE "deletedAt" IS NULL
         AND id = $1
@@ -128,7 +118,7 @@ class SongsService {
       text: `
         UPDATE ${this._tableName} 
         SET title = $1, year = $2, performer = $3, genre = $4, 
-        duration = $5, "albumId" = $6, "updatedAt" = $7 
+          duration = $5, "albumId" = $6, "updatedAt" = $7 
         WHERE "deletedAt" IS NULL
         AND id = $8
         RETURNING id

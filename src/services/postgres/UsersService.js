@@ -44,7 +44,11 @@ class UsersService {
    */
   async verifyNewUsername(username) {
     const query = {
-      text: `SELECT username FROM ${this._tableName} WHERE username = $1`,
+      text: `
+        SELECT username 
+        FROM ${this._tableName} 
+        WHERE username = $1
+      `,
       values: [username],
     };
 
@@ -68,7 +72,11 @@ class UsersService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const query = {
-      text: `INSERT INTO ${this._tableName} VALUES($1, $2, $3, $4) RETURNING id`,
+      text: `
+        INSERT INTO ${this._tableName} 
+        VALUES($1, $2, $3, $4) 
+        RETURNING id
+      `,
       values: [id, username, hashedPassword, fullname],
     };
 
@@ -88,7 +96,11 @@ class UsersService {
    */
   async getUserById(id) {
     const query = {
-      text: `SELECT id,username,fullname FROM ${this._tableName} WHERE id = $id`,
+      text: `
+        SELECT id, username, fullname 
+        FROM ${this._tableName} 
+        WHERE id = $id
+      `,
       values: [id],
     };
 
@@ -107,7 +119,11 @@ class UsersService {
    */
   async verifyUserCredential(username, password) {
     const query = {
-      text: `SELECT id,password FROM ${this._tableName} WHERE username = $1`,
+      text: `
+        SELECT id, password 
+        FROM ${this._tableName} 
+        WHERE username = $1
+      `,
       values: [username],
     };
 

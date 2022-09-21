@@ -44,11 +44,14 @@ class AlbumsService {
   async addAlbum({ name, year }) {
     const id = this._prefixId + nanoid(16);
     const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
 
     const query = {
-      text: `INSERT INTO ${this._tableName} VALUES($1, $2, $3, $4, $5) RETURNING id`,
-      values: [id, name, year, createdAt, updatedAt],
+      text: `
+        INSERT INTO ${this._tableName} 
+        VALUES($1, $2, $3, $4, $4) 
+        RETURNING id
+      `,
+      values: [id, name, year, createdAt],
     };
 
     const result = await this._pool.query(query);
@@ -121,7 +124,11 @@ class AlbumsService {
    */
   async deleteAlbumById(id) {
     const query = {
-      text: `DELETE FROM ${this._tableName} WHERE id = $1 RETURNING id`,
+      text: `
+        DELETE FROM ${this._tableName} 
+        WHERE id = $1 
+        RETURNING id
+      `,
       values: [id],
     };
 

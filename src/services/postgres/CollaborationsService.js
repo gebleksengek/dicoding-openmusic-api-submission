@@ -43,19 +43,18 @@ class CollaborationsService {
   async addCollaboration({ playlistId, userId }) {
     const id = this._prefixId + nanoid(16);
     const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
 
     const query = {
       text: `
         INSERT INTO ${this._tableName}
-        SELECT $1, $2, $3, $4, $5
+        SELECT $1, $2, $3, $4, $4
         WHERE EXISTS (
           SELECT 1 FROM users
-          WHERE "id" = $6
+          WHERE "id" = $5
         )
         RETURNING id
       `,
-      values: [id, playlistId, userId, createdAt, updatedAt, userId],
+      values: [id, playlistId, userId, createdAt, userId],
     };
 
     const result = await this._pool.query(query);

@@ -52,20 +52,19 @@ class PlaylistSongsService {
   async addPlaylistSong({ playlistId, songId, userId }) {
     const id = this._prefixId + nanoid(16);
     const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
 
     const query = {
       text: `
           INSERT INTO ${this._tableName} 
-          SELECT $1, $2, $3, $4, $5
+          SELECT $1, $2, $3, $4, $4
           WHERE EXISTS (
             SELECT 1 FROM songs
             WHERE "deletedAt" IS NULL
-            AND "id" = $6
+            AND "id" = $5
           )
           RETURNING id
         `,
-      values: [id, playlistId, songId, createdAt, updatedAt, songId],
+      values: [id, playlistId, songId, createdAt, songId],
     };
 
     const result = await this._pool.query(query);

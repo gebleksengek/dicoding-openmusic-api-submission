@@ -45,7 +45,11 @@ class AuthenticationsService {
    */
   async verifyRefreshToken(token) {
     const query = {
-      text: `SELECT token FROM ${this._tableName} WHERE token = $1`,
+      text: `
+        SELECT token
+        FROM ${this._tableName} 
+        WHERE token = $1
+      `,
       values: [token],
     };
 
@@ -61,7 +65,10 @@ class AuthenticationsService {
    */
   async deleteRefreshToken(token) {
     const query = {
-      text: `DELETE FROM ${this._tableName} WHERE token = $1`,
+      text: `
+        DELETE FROM ${this._tableName} 
+        WHERE token = $1
+      `,
       values: [token],
     };
 

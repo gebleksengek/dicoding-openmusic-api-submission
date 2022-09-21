@@ -54,11 +54,14 @@ class PlaylistsService {
   async addPlaylist({ owner, name }) {
     const id = this._prefixId + nanoid(16);
     const createdAt = new Date().toISOString();
-    const updatedAt = createdAt;
 
     const query = {
-      text: `INSERT INTO ${this._tableName} VALUES($1, $2, $3, $4, $5) RETURNING id`,
-      values: [id, name, owner, createdAt, updatedAt],
+      text: `
+        INSERT INTO ${this._tableName} 
+        VALUES($1, $2, $3, $4, $4) 
+        RETURNING id
+      `,
+      values: [id, name, owner, createdAt],
     };
 
     const result = await this._pool.query(query);
@@ -86,9 +89,9 @@ class PlaylistsService {
       values: [owner],
     };
 
-    const result = await this._pool.query(query);
+    const { rows } = await this._pool.query(query);
 
-    return result.rows;
+    return rows;
   }
 
   /**
@@ -153,7 +156,11 @@ class PlaylistsService {
    */
   async verifyPlaylistOwner({ id, owner }) {
     const query = {
-      text: `SELECT owner FROM ${this._tableName} WHERE id = $1`,
+      text: `
+        SELECT owner 
+        FROM ${this._tableName} 
+        WHERE id = $1
+      `,
       values: [id],
     };
 

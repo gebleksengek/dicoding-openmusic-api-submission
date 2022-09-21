@@ -5,6 +5,8 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 
+const config = require('./utils/config');
+
 const albumHapiPlugin = require('./api/albums');
 const AlbumsService = require('./services/postgres/AlbumsService');
 const AlbumsValidator = require('./validator/albums');
@@ -17,10 +19,15 @@ const collaborationHapiPlugin = require('./api/collaborations');
 const CollaborationsService = require('./services/postgres/CollaborationsService');
 const CollaborationsValidator = require('./validator/collaborations');
 
+const exportHapiPlugin = require('./api/exports');
+const ExportsValidator = require('./validator/exports');
+
 const playlistHapiPlugin = require('./api/playlists');
 const PlaylistSongsService = require('./services/postgres/PlaylistSongsService');
 const PlaylistsService = require('./services/postgres/PlaylistsService');
 const PlaylistsValidator = require('./validator/playlists');
+
+const ProducerService = require('./services/rabbitmq/ProducerService');
 
 const PSAService = require('./services/postgres/PlaylistSongActivitiesService');
 
@@ -38,8 +45,8 @@ const TokenManager = require('./tokenize/TokenManager');
 
 const init = async () => {
   const server = Hapi.server({
-    host: process.env.HOST,
-    port: process.env.PORT,
+    host: config.app.host,
+    port: config.app.port,
     routes: {
       cors: {
         origin: ['*'],
@@ -59,12 +66,12 @@ const init = async () => {
   await server.register(Jwt);
 
   server.auth.strategy('openmusic_jwt', 'jwt', {
-    keys: process.env.ACCESS_TOKEN_KEY,
+    keys: config.jwtToken.access_token_key,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+      maxAgeSec: config.jwtToken.access_token_age,
     },
     validate: (artifacts) => {
       return {
@@ -122,6 +129,14 @@ const init = async () => {
         collaborationsService,
         playlistsService,
         validator: CollaborationsValidator,
+      },
+    },
+    {
+      plugin: exportHapiPlugin,
+      options: {
+        playlistsService,
+        producerService: ProducerService,
+        validator: ExportsValidator,
       },
     },
   ]);

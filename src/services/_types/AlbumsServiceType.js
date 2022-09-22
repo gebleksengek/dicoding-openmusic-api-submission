@@ -16,6 +16,7 @@
  * @property {function(): Promise<Array> | Array} getAlbums
  * @property {function(string): Promise<any> | any} getAlbumById
  * @property {function(string, IAlbumEntity): Promise<void> | void} editAlbumById
+ * @property {function(string, string): Promise<void> | void} editAlbumCoverById
  * @property {function(string): Promise<void> | void} deleteAlbumById
  */
 

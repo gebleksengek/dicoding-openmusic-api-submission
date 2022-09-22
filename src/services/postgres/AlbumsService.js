@@ -77,7 +77,7 @@ class AlbumsService {
   async getAlbumById(id) {
     const query = {
       text: `
-        SELECT a.id, a.name, a.year, COALESCE(
+        SELECT a.id, a.name, a.year, cover as "coverUrl", COALESCE(
           json_agg(
             json_build_object(
               'id', s.id, 
@@ -116,7 +116,8 @@ class AlbumsService {
       text: `
         UPDATE ${this._tableName} 
         SET name = $1, year = $2, "updatedAt" = $3 
-        WHERE id = $4 RETURNING id
+        WHERE id = $4 
+        RETURNING id
       `,
       values: [name, year, updatedAt, id],
     };
@@ -125,6 +126,31 @@ class AlbumsService {
 
     if (!result.rowCount) {
       throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
+    }
+  }
+
+  /**
+   * @param {string} id
+   * @param {string} filename
+   */
+  async editAlbumCoverById(id, filename) {
+    const updatedAt = new Date().toISOString();
+    const query = {
+      text: `
+        UPDATE ${this._tableName}
+        SET cover = $1, "updatedAt" = $2
+        WHERE id = $3
+        RETURNING id
+      `,
+      values: [filename, updatedAt, id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError(
+        'Gagal memperbarui cover album. Id tidak ditemukan'
+      );
     }
   }
 

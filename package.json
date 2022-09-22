@@ -14,6 +14,7 @@
   "dependencies": {
     "@hapi/boom": "^10.0.0",
     "@hapi/hapi": "^20.2.2",
+    "@hapi/inert": "^7.0.0",
     "@hapi/jwt": "^3.0.0",
     "amqplib": "^0.10.3",
     "auto-bind": "^4.0.0",
@@ -22,7 +23,8 @@
     "joi": "^17.6.0",
     "nanoid": "^3.3.4",
     "node-pg-migrate": "^6.2.2",
-    "pg": "^8.8.0"
+    "pg": "^8.8.0",
+    "redis": "^4.3.1"
   },
   "devDependencies": {
     "@types/hapi__hapi": "^20.0.12",

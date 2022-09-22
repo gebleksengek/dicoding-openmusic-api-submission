@@ -3,7 +3,9 @@
 require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
+const Inert = require('@hapi/inert');
 const Jwt = require('@hapi/jwt');
+const path = require('path');
 
 const config = require('./utils/config');
 
@@ -14,6 +16,8 @@ const AlbumsValidator = require('./validator/albums');
 const authenticationsHapiPlugin = require('./api/authentications');
 const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const AuthenticationsValidator = require('./validator/authentications');
+
+const CacheService = require('./services/redis/CacheService');
 
 const collaborationHapiPlugin = require('./api/collaborations');
 const CollaborationsService = require('./services/postgres/CollaborationsService');
@@ -35,6 +39,10 @@ const songHapiPlugin = require('./api/songs');
 const SongsService = require('./services/postgres/SongsService');
 const SongsValidator = require('./validator/songs');
 
+const StorageService = require('./services/storage/StorageService');
+
+const UALService = require('./services/postgres/UserAlbumLikes');
+
 const userHapiPlugin = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
 const UsersValidator = require('./validator/users');
@@ -55,6 +63,8 @@ const init = async () => {
   });
 
   const albumsService = new AlbumsService();
+  const cacheService = new CacheService();
+  const ualService = new UALService();
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
@@ -62,8 +72,11 @@ const init = async () => {
   const psaService = new PSAService();
   const playlistsService = new PlaylistsService(collaborationsService);
   const playlistSongsService = new PlaylistSongsService(psaService);
+  const storageService = new StorageService(
+    path.resolve(__dirname, 'api/albums/file/covers')
+  );
 
-  await server.register(Jwt);
+  await server.register([Jwt.plugin, Inert]);
 
   server.auth.strategy('openmusic_jwt', 'jwt', {
     keys: config.jwtToken.access_token_key,
@@ -87,7 +100,10 @@ const init = async () => {
     {
       plugin: albumHapiPlugin,
       options: {
-        service: albumsService,
+        albumsService,
+        ualService,
+        storageService,
+        cacheService,
         validator: AlbumsValidator,
       },
     },

@@ -17,6 +17,9 @@ const config = {
       ? process.env.RABBITMQ_SERVER
       : 'amqp://localhost',
   },
+  redis: {
+    server: process.env.REDIS_SERVER,
+  },
 };
 
 module.exports = config;

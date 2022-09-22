@@ -109,14 +109,15 @@ class PlaylistsService {
             )
           ) FILTER (
             WHERE s."deletedAt" IS NULL
-            AND s."id" IS NOT NULL
+            AND s.id IS NOT NULL
             ),
         '[]') as songs
         FROM ${this._tableName} p
         LEFT JOIN users u ON p.owner = u.id
         LEFT JOIN playlist_songs ps ON ps.playlist_id = p.id
         LEFT JOIN songs s ON s.id = ps.song_id
-        WHERE p.id = $1 GROUP BY 1,2,3
+        WHERE p.id = $1 
+        GROUP BY p.id, u.username
       `,
       values: [id],
     };

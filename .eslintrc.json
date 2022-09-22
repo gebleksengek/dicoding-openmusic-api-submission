@@ -9,10 +9,7 @@
     "plugin:jsdoc/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": [
-    "prettier",
-    "sort-requires"
-  ],
+  "plugins": ["prettier", "sort-requires"],
   "overrides": [],
   "parserOptions": {
     "ecmaVersion": "latest"

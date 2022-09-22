@@ -77,13 +77,22 @@ class AlbumsService {
   async getAlbumById(id) {
     const query = {
       text: `
-        SELECT albums.id, albums.name, albums.year, COALESCE(
+        SELECT a.id, a.name, a.year, COALESCE(
           json_agg(
-            json_build_object('id', songs.id, 'title', songs.title, 'performer', songs.performer)
-          ) FILTER (WHERE songs.id IS NOT NULL),
+            json_build_object(
+              'id', s.id, 
+              'title', s.title, 
+              'performer', s.performer
+            )
+          ) FILTER (
+            WHERE s.id IS NOT NULL
+            AND s."deletedAt" IS NULL
+          ),
         '[]') as songs
-        FROM ${this._tableName} LEFT JOIN songs ON albums.id = "albumId" 
-        WHERE albums.id = $1 GROUP BY 1,2,3
+        FROM ${this._tableName} a
+        LEFT JOIN songs s ON a.id = "albumId" 
+        WHERE a.id = $1
+        GROUP BY a.id
       `,
       values: [id],
     };

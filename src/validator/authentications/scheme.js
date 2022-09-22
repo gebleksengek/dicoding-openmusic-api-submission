@@ -8,11 +8,11 @@ const PostAuthenticationPayloadScheme = Joi.object({
 });
 
 const PutAuthenticationPayloadScheme = Joi.object({
-  refreshToken: Joi.string().token().required(),
+  refreshToken: Joi.string().required(),
 });
 
 const DeleteAuthenticationPayloadScheme = Joi.object({
-  refreshToken: Joi.string().token().required(),
+  refreshToken: Joi.string().required(),
 });
 
 module.exports = {

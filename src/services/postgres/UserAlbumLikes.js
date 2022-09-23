@@ -8,6 +8,7 @@ const NotFoundError = require('../../exceptions/NotFoundError');
 
 /**
  * @typedef {import('../_types/UserAlbumLikesType').IUserAlbumLikes} IUserAlbumLikes
+ * @typedef {import('../redis/CacheService')} CacheService
  */
 
 /**
@@ -24,6 +25,12 @@ class UALService {
    * @readonly
    * @private
    */
+  _cacheService;
+
+  /**
+   * @readonly
+   * @private
+   */
   _tableName = 'user_album_likes';
 
   /**
@@ -32,8 +39,12 @@ class UALService {
    */
   _prefixId = 'ual-';
 
-  constructor() {
+  /**
+   * @param {CacheService} cacheService
+   */
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService;
   }
 
   /**
@@ -73,6 +84,8 @@ class UALService {
         }
       }
 
+      await this._cacheService.delete(`${this._tableName}:${albumId}`);
+
       return result.rows[0].bool ? 'like' : 'unlike';
     } catch (error) {
       if (error.code === '23503') {
@@ -87,20 +100,43 @@ class UALService {
 
   /**
    * @param {string} albumId
+   * @returns {Promise<{cached: boolean, count: number}>}
    */
   async getAlbumTotalLikes(albumId) {
-    const query = {
-      text: `
+    const cacheKey = `${this._tableName}:${albumId}`;
+
+    let cached = false;
+    let count = 0;
+
+    try {
+      const result = await this._cacheService.get(cacheKey);
+
+      count = JSON.parse(result).count;
+      cached = true;
+    } catch {
+      const query = {
+        text: `
         SELECT id
         FROM ${this._tableName}
         WHERE album_id = $1
       `,
-      values: [albumId],
+        values: [albumId],
+      };
+
+      const { rowCount } = await this._pool.query(query);
+
+      await this._cacheService.set(
+        cacheKey,
+        JSON.stringify({ count: rowCount })
+      );
+
+      count = rowCount;
+    }
+
+    return {
+      cached,
+      count,
     };
-
-    const { rowCount } = await this._pool.query(query);
-
-    return rowCount;
   }
 }
 

@@ -11,7 +11,6 @@ const config = require('../../utils/config');
  * @typedef {import('../../services/_types/AlbumsServiceType').IAlbumsService} IAlbumsService
  * @typedef {import('../../services/_types/UserAlbumLikesType').IUserAlbumLikes} IUserAlbumLikes
  * @typedef {import('../../services/storage/StorageService')} StorageService
- * @typedef {import('../../services/redis/CacheService')} CacheService
  */
 
 class AlbumsHandler {
@@ -37,32 +36,18 @@ class AlbumsHandler {
    * @readonly
    * @private
    */
-  _cacheService;
-
-  /**
-   * @readonly
-   * @private
-   */
   _validator;
 
   /**
    * @param {IAlbumsService} albumsService
    * @param {IUserAlbumLikes} ualService
    * @param {StorageService} storageService
-   * @param {CacheService} cacheService
    * @param {import('../../validator/albums')} validator
    */
-  constructor(
-    albumsService,
-    ualService,
-    storageService,
-    cacheService,
-    validator
-  ) {
+  constructor(albumsService, ualService, storageService, validator) {
     this._albumsService = albumsService;
     this._ualService = ualService;
     this._storageService = storageService;
-    this._cacheService = cacheService;
     this._validator = validator;
 
     autoBind(this);
@@ -177,8 +162,6 @@ class AlbumsHandler {
       userId,
     });
 
-    await this._cacheService.delete(`album:${id}`);
-
     const response = h.response({
       status: 'success',
       message: `Album berhasil ${action}`,
@@ -194,36 +177,19 @@ class AlbumsHandler {
    */
   async getAlbumTotalLikesByIdHandler(request, h) {
     const { id } = /** @type {{id: string}} */ (request.params);
-    const cacheKey = `album:${id}`;
 
-    let likes = 0;
+    const { cached, count } = await this._ualService.getAlbumTotalLikes(id);
 
-    try {
-      const result = await this._cacheService.get(cacheKey);
+    const response = h.response({
+      status: 'success',
+      data: {
+        likes: count,
+      },
+    });
 
-      likes = JSON.parse(result);
+    if (cached) response.header('X-Data-Source', 'cache');
 
-      const response = h.response({
-        status: 'success',
-        data: {
-          likes,
-        },
-      });
-      response.header('X-Data-Source', 'cache');
-
-      return response;
-    } catch {
-      likes = await this._ualService.getAlbumTotalLikes(id);
-
-      await this._cacheService.set(cacheKey, JSON.stringify(likes));
-
-      return {
-        status: 'success',
-        data: {
-          likes,
-        },
-      };
-    }
+    return response;
   }
 }
 

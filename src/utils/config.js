@@ -18,7 +18,7 @@ const config = {
       : 'amqp://localhost',
   },
   redis: {
-    server: process.env.REDIS_SERVER,
+    host: process.env.REDIS_SERVER,
   },
 };
 

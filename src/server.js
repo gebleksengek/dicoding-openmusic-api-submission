@@ -64,7 +64,7 @@ const init = async () => {
 
   const albumsService = new AlbumsService();
   const cacheService = new CacheService();
-  const ualService = new UALService();
+  const ualService = new UALService(cacheService);
   const songsService = new SongsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
@@ -103,7 +103,6 @@ const init = async () => {
         albumsService,
         ualService,
         storageService,
-        cacheService,
         validator: AlbumsValidator,
       },
     },
